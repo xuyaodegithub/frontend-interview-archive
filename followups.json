@@ -1,0 +1,72 @@
+[
+  {
+    "id": "P01", "relatedTo": "006", "kind": "场景题",
+    "title": "升级到 HTTP/3 后首屏没有变快，怎么验证原因？",
+    "answer": "先确认实际请求是否使用 h3，再按网络质量、首次访问和连接复用分组对比。用 Network 的 Protocol 和 Timing 看连接及首字节时间，用性能录制确认 LCP 关键路径。如果 TTFB、图片解码或 JS 执行主导首屏开销，传输协议带来的改善可能只占很小比例。用相同地区、资源与缓存条件比较。"
+  },
+  {
+    "id": "P02", "relatedTo": "018", "kind": "场景题",
+    "title": "API 返回 304，页面的数据为什么还是旧的？",
+    "answer": "304 说明服务端或中间缓存判断客户端已有的表示仍可复用。先看请求的 If-None-Match 与实际存储的响应，再核对不同参数、用户与语言是否共用验证器或缓存键。确认源站是否重新生成了 ETag，并排除应用查询缓存或 Service Worker 返回旧版本。修复后覆盖首次请求、正常验证和数据更新后三条链路。"
+  },
+  {
+    "id": "P03", "relatedTo": "032", "kind": "输出题",
+    "title": "把方法解构出来，这三次调用分别输出什么？",
+    "answer": "```js\n'use strict'\nconst user = { name: 'Ada', read() { return this?.name } }\nconst { read } = user\nconsole.log(user.read(), read(), read.call({ name: 'Lin' }))\n```\n\n**答案** 依次是 Ada、undefined、Lin。方法调用的接收者是 user。解构后的独立调用在严格模式中没有接收者。call 显式提供了第三次调用的接收者。"
+  },
+  {
+    "id": "P04", "relatedTo": "049", "kind": "输出题",
+    "title": "catch 中正常返回，后续的 then 会执行吗？",
+    "answer": "```js\nPromise.reject('失败')\n  .catch(reason => {\n    console.log(reason)\n    return '恢复'\n  })\n  .then(value => console.log(value))\nconsole.log('同步')\n```\n\n**答案** 输出「同步」「失败」「恢复」。catch 返回的普通值让后续 Promise 兑现。如果希望继续向下游传播失败，可以在 catch 中抛出异常或返回拒绝的 Promise。"
+  },
+  {
+    "id": "P05", "relatedTo": "063", "kind": "场景题",
+    "title": "用事件委托做列表删除，为什么点图标时找不到按钮？",
+    "answer": "event.target 可能指向按钮内的图标或文字容器。用 closest 找最近的带操作标记的元素，并确认它位于监听容器内。操作按钮仍使用原生 button，保证键盘和点击触发同一条处理逻辑。若包含 Shadow DOM，再按组件的事件约定检查事件路径与 retargeting。"
+  },
+  {
+    "id": "P06", "relatedTo": "079", "kind": "场景题",
+    "title": "Flex 布局里的长标题为什么把右侧按钮挤出了容器？",
+    "answer": "标题所在 Flex 项通常受自动最小尺寸约束。给允许收缩的那一项设置 `min-width: 0`，再在实际显示文本的盒子设置省略样式。按设计让右侧必要操作保持可用。用中文、长英文标识符及窄视口验证。"
+  },
+  {
+    "id": "P07", "relatedTo": "090", "kind": "场景题",
+    "title": "如何让 TypeScript 在新增加载状态时提醒你更新组件？",
+    "answer": "用 status 字面量建立判别联合，把 idle、loading、success 和 error 定义为独立分支。用 switch 渲染各分支，default 中把剩余值赋给 never 或传给 assertNever。新增分支但遗漏渲染时，TypeScript 会在穷尽检查报错。"
+  },
+  {
+    "id": "P08", "relatedTo": "105", "kind": "场景题",
+    "title": "React 计时器里 count 总是初始值，怎么修？",
+    "answer": "只在挂载时建立的计时器回调捕获了初次 render 的 count。如果目标是每次递增，改用 `setCount(previous => previous + 1)`。定时器需要随其他配置变化时，把真实依赖加入 effect，并在 cleanup 中清除旧计时器。"
+  },
+  {
+    "id": "P09", "relatedTo": "116", "kind": "场景题",
+    "title": "Vue watch 请求列表时，上一次请求覆盖了结果，怎么处理？",
+    "answer": "watch 显式依赖筛选条件，回调中启动新请求前清理上一轮。可以使用 watch 提供的清理回调注册 AbortController，并给请求加序号保护最终写入。只允许仍对应当前筛选条件的请求更新 loading、error 和 data。"
+  },
+  {
+    "id": "P10", "relatedTo": "129", "kind": "场景题",
+    "title": "组件库打包后 JavaScript 正常，CSS 却全部丢失，怎么查？",
+    "answer": "从消费项目的产物确认 CSS 是缺少导入、缺少发布文件，还是被 tree shaking 移除。如果 CSS 以副作用导入且包配置为 `sideEffects: false`，按实际输出路径把样式加入例外。用真实发布包在生产模式构建一个最小消费项目，验证组件样式与按需导入一起生效。"
+  },
+  {
+    "id": "P11", "relatedTo": "141", "kind": "场景题",
+    "title": "首页大图下载只花一百毫秒，为什么 LCP 仍然很慢？",
+    "answer": "LCP 取元素渲染时间。先确认大图是最终 LCP 元素，再看请求是否启动得晚，以及下载完成后是否被 CSS、JS、解码或不可见状态拖延显示。分别记录资源发现、下载、呈现三个时间点，再选择优化关键路径。"
+  },
+  {
+    "id": "P12", "relatedTo": "154", "kind": "场景题",
+    "title": "命令行请求能成功，浏览器却报 CORS，下一步查哪里？",
+    "answer": "命令行客户端通常不执行浏览器的 CORS 规则。在浏览器 Network 找预检和实际请求，检查 Origin、请求方法与头部、允许源与允许凭据配置。留意网关错误响应是否也附上所需的 CORS 头。最终用真实页面 origin 验证。"
+  },
+  {
+    "id": "P13", "relatedTo": "164", "kind": "手写题",
+    "title": "给节流函数增加尾沿执行，怎么保留最后一次调用的参数？",
+    "answer": "用一个计时器表示当前窗口，期间每次调用只替换待处理的接收者和参数。到期先释放计时器，再取走最后一组参数执行。下例是仅尾沿版本，适合需要处理最后一次输入的固定窗口采样。\n\n```js\nfunction trailingThrottle(fn, delay) {\n  let timer\n  let pending\n  return function (...args) {\n    pending = [this, args]\n    if (timer !== undefined) return\n    timer = setTimeout(() => {\n      const [receiver, latest] = pending\n      timer = undefined\n      pending = undefined\n      fn.apply(receiver, latest)\n    }, delay)\n  }\n}\n```"
+  },
+  {
+    "id": "P14", "relatedTo": "181", "kind": "场景题",
+    "title": "用户连续两次点赞切换，第一条请求失败，该怎么回滚？",
+    "answer": "给每次操作分配版本或稳定的操作 ID，界面显示最近意图。旧请求失败时，只移除对应的乐观变更，并依据已确认状态与后续待确认操作重新计算。也可串行化同一对象的写入，并发送目标状态。最终用服务端版本或主动重取核对。"
+  }
+]
