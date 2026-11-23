@@ -182,6 +182,16 @@ progress::-moz-progress-bar { background: var(--accent); border-radius: 10px }
 .answer-card { margin-top: 19px; border: 1px solid var(--line); border-radius: var(--radius); background: white; padding: clamp(16px, 4vw, 29px) }
 .answer-card h2 { margin-bottom: 13px }
 .answer-body { display: grid; gap: 14px; overflow-wrap: anywhere; line-height: 1.85 }
+.answer-explanation { font-size: 1.05rem }
+.answer-example {
+  padding: 13px 15px; border-left: 3px solid #8174d7; border-radius: 0 9px 9px 0;
+  background: #f5f3fe; color: #342b63;
+}
+.answer-example h3 { margin-bottom: 3px; font-size: .95rem }
+.answer-details { min-width: 0; border-top: 1px solid var(--line); padding-top: 9px }
+.answer-details summary { cursor: pointer; width: fit-content; color: var(--accent-dark); font-weight: 700 }
+.answer-details summary:hover { text-decoration: underline }
+.answer-details > .answer-body { margin-top: 11px; min-width: 0 }
 .answer-body a { color: var(--accent-dark); text-decoration: underline; text-underline-offset: 3px }
 .answer-body code { padding: .08rem .26rem; border-radius: 4px; background: #f1effa; color: #3e376c; font: .9em ui-monospace, SFMono-Regular, monospace }
 .answer-body pre {

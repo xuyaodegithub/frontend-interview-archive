@@ -4,6 +4,7 @@
 
 - 190 道文档原题，保留题号、重点标记、代码和参考链接。
 - 14 道关联的延伸题，覆盖输出题、手写题和业务场景题。
+- 每道题都有通俗解释和具体例子，可展开详细解答或参考代码。
 - 支持全文搜索、筛选、随机练习、收藏和掌握记录。进度保存在当前浏览器。
 
 ## 本地使用
@@ -18,10 +19,10 @@ python3 -m http.server 8765 --bind 127.0.0.1 --directory dist
 
 ## 更新题库
 
-编辑 [题库原稿](前端开发工程师面试题库.md) 或 [延伸题](followups.json)，再运行 `python3 import_questions.py` 生成 `dist/questions.js`。延伸题通过 `relatedTo` 关联原题编号。
+编辑 [题库原稿](前端开发工程师面试题库.md)、[延伸题](followups.json) 或 [通俗解答与例子](plain_answers.tsv)，再运行 `python3 import_questions.py` 生成 `dist/questions.js`。新增题目时，用同一题号补上通俗解答和例子。延伸题通过 `relatedTo` 关联原题编号。
 
 ## 许可证
 
 - 网站实现、导入脚本和界面资源采用 [MIT](LICENSE)。
-- 题目和答案（包括在 Markdown、JSON 和生成数据中的副本）采用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)。转载时请署名 **xuyaodegithub**，附上[题库原仓库](https://github.com/xuyaodegithub/frontend-interview-archive)和许可证链接，并说明是否修改。
+- 题目和答案（包括在 Markdown、JSON、TSV 和生成数据中的副本）采用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)。转载时请署名 **xuyaodegithub**，附上[题库原仓库](https://github.com/xuyaodegithub/frontend-interview-archive)和许可证链接，并说明是否修改。
 - 题库链接指向的第三方资料适用各自的许可。

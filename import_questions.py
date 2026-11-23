@@ -1,4 +1,4 @@
-"""Compile the interview Markdown and supplemental questions into offline site data."""
+"""Compile the interview questions and explanations into offline site data."""
 
 import argparse
 import json
@@ -73,6 +73,28 @@ def load_original(path):
     return questions
 
 
+def load_plain_answers(path, expected_ids):
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if not lines or lines[0].split("\t") != ["id", "explanation", "example"]:
+        raise ValueError("Expected id, explanation, and example columns in plain_answers.tsv")
+
+    answers = {}
+    for line_number, line in enumerate(lines[1:], 2):
+        fields = [field.strip() for field in line.split("\t")]
+        if len(fields) != 3 or not all(fields):
+            raise ValueError(f"Invalid plain answer on line {line_number}")
+        number, explanation, example = fields
+        if number in answers:
+            raise ValueError(f"Duplicate plain answer: {number}")
+        answers[number] = {"explanation": explanation, "example": example}
+
+    missing = expected_ids - answers.keys()
+    unexpected = answers.keys() - expected_ids
+    if missing or unexpected:
+        raise ValueError(f"Plain answer IDs differ. Missing: {sorted(missing)}. Unexpected: {sorted(unexpected)}.")
+    return answers
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("source", nargs="?", type=Path, default=ROOT / "前端开发工程师面试题库.md")
@@ -87,9 +109,13 @@ def main():
             raise ValueError(f"Invalid follow-up: {question['id']}")
         keys.add(question["id"])
         question.update(topic=related["topic"], featured=False)
+    plain_answers = load_plain_answers(ROOT / "plain_answers.tsv", keys)
+    entries = original + variants
+    for question in entries:
+        question.update(plain_answers[question["id"]])
     data = {
         "topics": [dict(zip(("id", "title", "mark", "tone", "summary"), topic)) for topic in TOPICS],
-        "questions": original + variants,
+        "questions": entries,
     }
     output = ROOT / "dist" / "questions.js"
     output.write_text("window.interviewData = " + json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

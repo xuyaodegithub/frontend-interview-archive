@@ -7,7 +7,8 @@ const byTopic = new Map(topics.map(topic => [topic.id, questions.filter(question
 const questionRanks = new Map(questions.map((question, index) => [question.id, index]))
 const searchable = new Map(questions.map(question => [
   question.id,
-  [question.id, question.title, question.answer, topicById.get(question.topic).title, question.kind]
+  [question.id, question.title, question.explanation, question.example, question.answer,
+    topicById.get(question.topic).title, question.kind]
     .join(' ').normalize('NFKC').toLowerCase()
 ]))
 const kinds = ['口述题', '输出题', '手写题', '场景题']
@@ -304,7 +305,7 @@ function renderList(route) {
     </nav>` : ''}`
 }
 
-function renderDetail(route) {
+function renderDetail(route, detailsOpen) {
   const { question, topic, from, practice } = route
   const topicTitle = topicById.get(question.topic).title
   const listTitle = from === 'saved' ? '我的收藏' : from === 'priority' ? '重点题目' : topic?.title ?? '全部题目'
@@ -319,6 +320,17 @@ function renderDetail(route) {
   const output = question.kind === '输出题' && question.answer.match(/^(```[^\n]*\n[\s\S]*?\n```)\n*/)
   const prompt = output ? output[1] : ''
   const answer = output ? question.answer.slice(output[0].length) : question.answer
+  const answerBody = question.explanation && question.example
+    ? `<p class="answer-explanation">${escapeHTML(question.explanation)}</p>
+      <div class="answer-example">
+        <h3>举个例子</h3>
+        <p>${escapeHTML(question.example)}</p>
+      </div>
+      <details id="answer-details" class="answer-details" ${detailsOpen ? 'open' : ''}>
+        <summary>${question.kind === '手写题' ? '查看参考代码与细节' : '查看详细解答'}</summary>
+        <div class="answer-body">${markdownToHTML(answer)}</div>
+      </details>`
+    : markdownToHTML(answer)
   main.innerHTML = `<article class="detail">
     <div class="crumb"><a href="#home">学习总览</a><span aria-hidden="true">/</span>
       <a href="${href(from, listParams(route))}">${escapeHTML(listTitle)}</a>
@@ -329,7 +341,7 @@ function renderDetail(route) {
     ${prompt ? `<div class="answer-card answer-body">${markdownToHTML(prompt)}</div>` : ''}
     <section class="answer-card" aria-labelledby="answer-title">
       <h2 id="answer-title">参考答案</h2>
-      <div id="answer-content" class="answer-body" ${answerOpen ? '' : 'hidden'}>${markdownToHTML(answer)}</div>
+      <div id="answer-content" class="answer-body" ${answerOpen ? '' : 'hidden'}>${answerBody}</div>
       <button class="button" type="button" data-action="reveal" aria-expanded="${answerOpen}" aria-controls="answer-content" ${answerOpen ? 'hidden' : ''}>查看参考答案</button>
     </section>
     <div class="detail-actions">
@@ -351,7 +363,10 @@ function render({ preserveScroll = false, preserveSearch = false } = {}) {
   sidebar.scrollTop = scroll
   if (!preserveSearch) search.value = route.params.get('q') ?? ''
   if (route.page === 'home') renderHome()
-  else if (route.page === 'detail') renderDetail(route)
+  else if (route.page === 'detail') {
+    const detailsOpen = preserveScroll && Boolean(main.querySelector('#answer-details[open]'))
+    renderDetail(route, detailsOpen)
+  }
   else renderList(route)
   const heading = main.querySelector('h1')
   document.title = route.page === 'home' ? '前端面试题库' : heading.textContent + ' · 前端面试题库'
